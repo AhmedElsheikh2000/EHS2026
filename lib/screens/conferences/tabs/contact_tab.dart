@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactTab extends StatefulWidget {
   const ContactTab({Key? key}) : super(key: key);
@@ -10,10 +11,14 @@ class ContactTab extends StatefulWidget {
 
 class _ContactTabState extends State<ContactTab> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _subjectController = TextEditingController();
-  final _messageController = TextEditingController();
+
+  final _nameController = TextEditingController(text: 'Dr. John Smith');
+  final _emailController = TextEditingController(text: 'john.smith@example.com');
+  final _phoneController = TextEditingController(text: '+971 50 000 0000');
+  final _subjectController = TextEditingController(text: 'Conference Registration Inquiry');
+  final _messageController = TextEditingController(text: 'Please provide details about your inquiry...');
+
+  String _preferredOffice = 'North Africa Office';
 
   // EHS Brand Colors
   static const Color primaryBlue = Color(0xFF344E75);
@@ -21,13 +26,61 @@ class _ContactTabState extends State<ContactTab> {
   static const Color accentBlue = Color(0xFFb7d1da);
   static const Color lightGray = Color(0xFFF8FAFC);
 
+  // Folder Group Social Links
+  static const String _facebookUrl =
+      'https://www.facebook.com/share/171eccWGqs/?mibextid=wwXIfr';
+  static const String _instagramUrl =
+      'https://www.instagram.com/foldermiddleeast?igsh=am5uYmNvaDFyMnk2';
+  static const String _xUrl = 'https://x.com/FOLDERmiddleast';
+  static const String _linkedinUrl =
+      'https://www.linkedin.com/company/folder-group';
+  static const String _tiktokUrl = 'https://www.tiktok.com/@folder_group';
+  static const String _youtubeUrl = 'https://m.youtube.com/@FolderGroup';
+
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _subjectController.dispose();
     _messageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not open link: $url'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _callPhone(String phone) async {
+    final uri = Uri.parse('tel:$phone');
+    if (!await launchUrl(uri)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open phone dialer'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _sendEmail(String email) async {
+    final uri = Uri.parse('mailto:$email');
+    if (!await launchUrl(uri)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open email app'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _handleSubmit() {
@@ -38,11 +91,17 @@ class _ContactTabState extends State<ContactTab> {
           backgroundColor: primaryBlue,
         ),
       );
+
       // Clear form
       _nameController.clear();
       _emailController.clear();
+      _phoneController.clear();
       _subjectController.clear();
       _messageController.clear();
+
+      setState(() {
+        _preferredOffice = 'North Africa Office';
+      });
     }
   }
 
@@ -61,7 +120,7 @@ class _ContactTabState extends State<ContactTab> {
               ),
             ),
           ),
-          
+
           // Main Content
           SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -72,9 +131,14 @@ class _ContactTabState extends State<ContactTab> {
                   children: [
                     _buildHeader(),
                     const SizedBox(height: 48),
-                    _buildContactCards(),
+
+                    // ✅ Office Cards بدل cards القديمة
+                    _buildOfficeCards(),
+
                     const SizedBox(height: 48),
                     _buildMainContent(),
+                    const SizedBox(height: 48),
+                    _buildNeedImmediateAssistance(),
                     const SizedBox(height: 48),
                     _buildFAQSection(),
                   ],
@@ -109,7 +173,7 @@ class _ContactTabState extends State<ContactTab> {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Get in touch with the EHS Conferences team',
+          'Get in touch with the organizing team',
           style: TextStyle(
             fontSize: 18,
             color: Colors.grey,
@@ -119,63 +183,26 @@ class _ContactTabState extends State<ContactTab> {
     );
   }
 
-  Widget _buildContactCards() {
+  // =========================
+  // ✅ Office Cards
+  // =========================
+  Widget _buildOfficeCards() {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 900) {
           return Row(
             children: [
-              Expanded(child: _buildContactCard(
-                icon: Icons.phone,
-                title: 'Phone',
-                content: '+971 4 6650000',
-                subtitle: 'Mon-Fri: 8:00 AM - 5:00 PM',
-                color: primaryBlue,
-              )),
+              Expanded(child: _buildOfficeCard(isNorthAfrica: true)),
               const SizedBox(width: 24),
-              Expanded(child: _buildContactCard(
-                icon: Icons.email,
-                title: 'Email',
-                content: 'conferences@ehs.gov.ae',
-                subtitle: "We'll respond within 24 hours",
-                color: secondaryGreen,
-              )),
-              const SizedBox(width: 24),
-              Expanded(child: _buildContactCard(
-                icon: Icons.location_on,
-                title: 'Location',
-                content: 'Dubai, United Arab Emirates',
-                subtitle: 'P.O. BOX 2299',
-                color: accentBlue,
-              )),
+              Expanded(child: _buildOfficeCard(isNorthAfrica: false)),
             ],
           );
         } else {
           return Column(
             children: [
-              _buildContactCard(
-                icon: Icons.phone,
-                title: 'Phone',
-                content: '+971 4 6650000',
-                subtitle: 'Mon-Fri: 8:00 AM - 5:00 PM',
-                color: primaryBlue,
-              ),
+              _buildOfficeCard(isNorthAfrica: true),
               const SizedBox(height: 16),
-              _buildContactCard(
-                icon: Icons.email,
-                title: 'Email',
-                content: 'conferences@ehs.gov.ae',
-                subtitle: "We'll respond within 24 hours",
-                color: secondaryGreen,
-              ),
-              const SizedBox(height: 16),
-              _buildContactCard(
-                icon: Icons.location_on,
-                title: 'Location',
-                content: 'Dubai, United Arab Emirates',
-                subtitle: 'P.O. BOX 2299',
-                color: accentBlue,
-              ),
+              _buildOfficeCard(isNorthAfrica: false),
             ],
           );
         }
@@ -183,82 +210,152 @@ class _ContactTabState extends State<ContactTab> {
     );
   }
 
- Widget _buildContactCard({
-  required IconData icon,
-  required String title,
-  required String content,
-  required String subtitle,
-  required Color color,
-}) {
-  return Container(
-    width: double.infinity, // ✅ ياخد عرض الشاشة كله
-    margin: const EdgeInsets.symmetric(vertical: 8),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border(left: BorderSide(color: color, width: 6)), // ✅ خط جانبي ملون
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.05), // ✅ لازم جوة BoxShadow
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    padding: const EdgeInsets.all(20),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // أيقونة الكارت
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 30),
-        ),
-        const SizedBox(width: 16),
+  Widget _buildOfficeCard({required bool isNorthAfrica}) {
+    final title = isNorthAfrica ? 'North Africa Office' : 'Gulf Office';
+    final email = 'Info@foldergroup.com';
+    final phone = isNorthAfrica ? '+20 10 97956307' : '+971 56 932 1297';
+    final address = isNorthAfrica
+        ? '142 Galal El-Desouky St., Wabour Al Meyah, Alexandria 21522, Egypt'
+        : '303, WESTBURRY TOWER 1, BUSINESS BAY, DUBAI, UAE';
+    final hours = isNorthAfrica
+        ? 'Sun – Thu: 9:00 AM – 5:00 PM'
+        : 'Sun – Thu: 9:00 AM – 6:00 PM';
 
-        // النصوص
+    final Color color = isNorthAfrica ? primaryBlue : secondaryGreen;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border(left: BorderSide(color: color, width: 6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  isNorthAfrica ? Icons.location_city_rounded : Icons.apartment_rounded,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: primaryBlue,
+                  ),
+                ),
+              ),
+              // optional logo (لو عندك asset)
+              // Image.asset('assets/folder_logo.png', height: 26),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
+          _buildInfoRow(
+            icon: Icons.email_outlined,
+            label: 'Email',
+            value: email,
+            onTap: () => _sendEmail(email),
+            valueColor: primaryBlue,
+          ),
+          const SizedBox(height: 10),
+          _buildInfoRow(
+            icon: Icons.phone_outlined,
+            label: 'Phone',
+            value: phone,
+            onTap: () => _callPhone(phone),
+            valueColor: primaryBlue,
+          ),
+          const SizedBox(height: 10),
+          _buildInfoRow(
+            icon: Icons.location_on_outlined,
+            label: 'Address',
+            value: address,
+            onTap: null,
+            valueColor: Colors.black87,
+          ),
+          const SizedBox(height: 10),
+          _buildInfoRow(
+            icon: Icons.access_time_rounded,
+            label: 'Working Hours',
+            value: hours,
+            onTap: null,
+            valueColor: Colors.black87,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required VoidCallback? onTap,
+    required Color valueColor,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey[600]),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: primaryBlue,
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                content,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
+              InkWell(
+                onTap: onTap,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: onTap != null ? primaryBlue : valueColor,
+                    fontWeight: onTap != null ? FontWeight.w600 : FontWeight.w500,
+                    decoration: onTap != null ? TextDecoration.underline : TextDecoration.none,
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ],
-    ),
-  );
-}
+    );
+  }
 
-
+  // =========================
+  // Main Content: Form + Sidebar
+  // =========================
   Widget _buildMainContent() {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -290,6 +387,7 @@ class _ContactTabState extends State<ContactTab> {
     );
   }
 
+  // ✅ Form updated: Full Name, Email, Phone, Preferred Office, Subject, Message
   Widget _buildContactForm() {
     return Container(
       decoration: BoxDecoration(
@@ -326,7 +424,7 @@ class _ContactTabState extends State<ContactTab> {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  'Send us a Message',
+                  'Send Us a Message',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -335,37 +433,65 @@ class _ContactTabState extends State<ContactTab> {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 10),
+            Text(
+              'Please share your details and inquiry, and a member of the organizing team will get back to you shortly.',
+              style: TextStyle(color: Colors.grey[700], height: 1.4),
+            ),
+            const SizedBox(height: 28),
+
             _buildTextField(
               controller: _nameController,
               label: 'Full Name',
-              hint: 'Enter your full name',
+              hint: 'Dr. John Smith',
               icon: Icons.person_outline,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
             _buildTextField(
               controller: _emailController,
               label: 'Email Address',
-              hint: 'your.email@example.com',
+              hint: 'john.smith@example.com',
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            _buildTextField(
+              controller: _phoneController,
+              label: 'Phone Number',
+              hint: '+971 50 000 0000',
+              icon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+            ),
+            const SizedBox(height: 20),
+
+            _buildDropdownField(
+              label: 'Preferred Office',
+              value: _preferredOffice,
+              items: const ['North Africa Office', 'Gulf Office'],
+              onChanged: (val) => setState(() => _preferredOffice = val!),
+              icon: Icons.apartment_rounded,
+            ),
+            const SizedBox(height: 20),
+
             _buildTextField(
               controller: _subjectController,
               label: 'Subject',
-              hint: 'What is this regarding?',
-              icon: null,
+              hint: 'Conference Registration Inquiry',
+              icon: Icons.subject_rounded,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
             _buildTextField(
               controller: _messageController,
               label: 'Message',
-              hint: 'Tell us more about your inquiry...',
+              hint: 'Please provide details about your inquiry...',
               icon: Icons.message_outlined,
               maxLines: 5,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
+
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -441,13 +567,10 @@ class _ContactTabState extends State<ContactTab> {
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (value) {
-            if (value == null || value.isEmpty) {
+            if (value == null || value.trim().isEmpty) {
               return 'This field is required';
             }
             return null;
@@ -457,75 +580,76 @@ class _ContactTabState extends State<ContactTab> {
     );
   }
 
+  Widget _buildDropdownField({
+    required String label,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+    IconData? icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: value,
+          onChanged: onChanged,
+          items: items
+              .map((e) => DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  ))
+              .toList(),
+          decoration: InputDecoration(
+            prefixIcon: icon != null ? Icon(icon, color: Colors.grey) : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 2),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 2),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: primaryBlue, width: 2),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          validator: (val) {
+            if (val == null || val.isEmpty) return 'Please choose an office';
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  // =========================
+  // Sidebar
+  // =========================
   Widget _buildSidebar() {
     return Column(
       children: [
-        _buildQuickLinks(),
+        _buildOfficeHoursCard(),
         const SizedBox(height: 24),
-        _buildOfficeHours(),
-        const SizedBox(height: 24),
-        _buildSocialMedia(),
+        _buildSocialMediaFolder(),
       ],
     );
   }
 
-  Widget _buildQuickLinks() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [primaryBlue, Color(0xFF4a6a95)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 30,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Quick Links',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildQuickLinkItem(Icons.language, 'www.ehs.gov.ae'),
-          const SizedBox(height: 12),
-          _buildQuickLinkItem(Icons.email, 'Support Portal'),
-          const SizedBox(height: 12),
-          _buildQuickLinkItem(Icons.phone, 'Emergency Line'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickLinkItem(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.white, size: 18),
-        const SizedBox(width: 12),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOfficeHours() {
+  // ✅ Working Hours updated (Sun–Thu)
+  Widget _buildOfficeHoursCard() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -543,7 +667,7 @@ class _ContactTabState extends State<ContactTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Office Hours',
+            'Working Hours',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -551,31 +675,30 @@ class _ContactTabState extends State<ContactTab> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildOfficeHourItem('Monday - Thursday', '8:00 AM - 5:00 PM'),
+          _buildOfficeHourItem('North Africa Office', 'Sun – Thu: 9:00 AM – 5:00 PM'),
           const Divider(height: 24),
-          _buildOfficeHourItem('Friday', '8:00 AM - 12:00 PM'),
-          const Divider(height: 24),
-          _buildOfficeHourItem('Saturday - Sunday', 'Closed', isRed: true),
+          _buildOfficeHourItem('Gulf Office', 'Sun – Thu: 9:00 AM – 6:00 PM'),
         ],
       ),
     );
   }
 
-  Widget _buildOfficeHourItem(String day, String time, {bool isRed = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildOfficeHourItem(String office, String time) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          day,
+          office,
           style: const TextStyle(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: Colors.black87,
           ),
         ),
+        const SizedBox(height: 6),
         Text(
           time,
           style: TextStyle(
-            color: isRed ? Colors.red : Colors.grey[700],
+            color: Colors.grey[700],
             fontSize: 14,
           ),
         ),
@@ -583,7 +706,8 @@ class _ContactTabState extends State<ContactTab> {
     );
   }
 
-  Widget _buildSocialMedia() {
+  // ✅ Social Media Folder Group (Clickable)
+  Widget _buildSocialMediaFolder() {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -605,7 +729,7 @@ class _ContactTabState extends State<ContactTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Follow Us',
+            'Folder Group Social Media',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -618,21 +742,123 @@ class _ContactTabState extends State<ContactTab> {
             shrinkWrap: true,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 2.5,
+            childAspectRatio: 2.6,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              _buildSocialButton('Twitter'),
-              _buildSocialButton('LinkedIn'),
-              _buildSocialButton('Facebook'),
-              _buildSocialButton('Instagram'),
+              _socialBtn('Facebook', Icons.facebook, () => _openUrl(_facebookUrl)),
+              _socialBtn('Instagram', Icons.camera_alt_rounded, () => _openUrl(_instagramUrl)),
+              _socialBtn('X (Twitter)', Icons.close_rounded, () => _openUrl(_xUrl)),
+              _socialBtn('LinkedIn', Icons.business_center_rounded, () => _openUrl(_linkedinUrl)),
+              _socialBtn('TikTok', Icons.music_note_rounded, () => _openUrl(_tiktokUrl)),
+              _socialBtn('YouTube', Icons.play_circle_fill_rounded, () => _openUrl(_youtubeUrl)),
             ],
           ),
-          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _socialBtn(String title, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.18),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withOpacity(0.25)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // Need Immediate Assistance
+  // =========================
+  Widget _buildNeedImmediateAssistance() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           const Text(
-            '@EHSUAE',
+            'Need Immediate Assistance?',
             style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: primaryBlue,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'For urgent matters, please contact our offices directly during working hours. Our team will be happy to support you.',
+            style: TextStyle(color: Colors.grey[700], height: 1.4),
+          ),
+          const SizedBox(height: 16),
+
+          InkWell(
+            onTap: () => _callPhone('+201097956307'),
+            child: const Row(
+              children: [
+                Icon(Icons.phone, color: primaryBlue, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  'North Africa: +20 10 97956307',
+                  style: TextStyle(
+                    color: primaryBlue,
+                    fontWeight: FontWeight.w700,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          InkWell(
+            onTap: () => _callPhone('+971569321297'),
+            child: const Row(
+              children: [
+                Icon(Icons.phone, color: primaryBlue, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  'Gulf: +971 56 932 1297',
+                  style: TextStyle(
+                    color: primaryBlue,
+                    fontWeight: FontWeight.w700,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -640,25 +866,9 @@ class _ContactTabState extends State<ContactTab> {
     );
   }
 
-  Widget _buildSocialButton(String platform) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Text(
-          platform,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
+  // =========================
+  // FAQ (زي ما هو بس خليته مناسب)
+  // =========================
   Widget _buildFAQSection() {
     return Container(
       decoration: BoxDecoration(
@@ -701,8 +911,8 @@ class _ContactTabState extends State<ContactTab> {
                         const SizedBox(width: 24),
                         Expanded(
                           child: _buildFAQItem(
-                            'What is the cancellation policy?',
-                            'Please contact us at least 48 hours before the event for cancellation or rescheduling requests.',
+                            'How can I contact the organizing team?',
+                            'Use the contact form above or call the office numbers during working hours.',
                           ),
                         ),
                       ],
@@ -713,15 +923,15 @@ class _ContactTabState extends State<ContactTab> {
                       children: [
                         Expanded(
                           child: _buildFAQItem(
-                            'Are the conferences certified?',
-                            'Yes, all our conferences provide official certificates upon completion.',
+                            'What are the working hours?',
+                            'Sun – Thu: 9:00 AM – 5:00 PM (North Africa) and 9:00 AM – 6:00 PM (Gulf).',
                           ),
                         ),
                         const SizedBox(width: 24),
                         Expanded(
                           child: _buildFAQItem(
-                            'Can I attend virtually?',
-                            'Many of our conferences offer virtual attendance options. Check the conference details for availability.',
+                            'Which office should I choose?',
+                            'Select the office closest to your region (North Africa or Gulf) so we can respond faster.',
                           ),
                         ),
                       ],
@@ -737,18 +947,18 @@ class _ContactTabState extends State<ContactTab> {
                     ),
                     const SizedBox(height: 16),
                     _buildFAQItem(
-                      'What is the cancellation policy?',
-                      'Please contact us at least 48 hours before the event for cancellation or rescheduling requests.',
+                      'How can I contact the organizing team?',
+                      'Use the contact form above or call the office numbers during working hours.',
                     ),
                     const SizedBox(height: 16),
                     _buildFAQItem(
-                      'Are the conferences certified?',
-                      'Yes, all our conferences provide official certificates upon completion.',
+                      'What are the working hours?',
+                      'Sun – Thu: 9:00 AM – 5:00 PM (North Africa) and 9:00 AM – 6:00 PM (Gulf).',
                     ),
                     const SizedBox(height: 16),
                     _buildFAQItem(
-                      'Can I attend virtually?',
-                      'Many of our conferences offer virtual attendance options. Check the conference details for availability.',
+                      'Which office should I choose?',
+                      'Select the office closest to your region (North Africa or Gulf) so we can respond faster.',
                     ),
                   ],
                 );
@@ -803,7 +1013,7 @@ class GeometricPatternPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final spacing = 50.0;
-    
+
     for (double x = 0; x < size.width; x += spacing) {
       for (double y = 0; y < size.height; y += spacing) {
         canvas.drawLine(

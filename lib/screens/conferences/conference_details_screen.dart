@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-  import 'dart:async';
-  import 'dart:ui';
-  import '../../models/conference.dart';
-  import 'tabs/contact_tab.dart';
-  import 'tabs/program_tab.dart';
-  import 'features/about_ehs_screen.dart';
-  import 'tabs/speakers_tab.dart';
+import 'dart:async';
+import 'dart:ui';
+import '../../models/conference.dart';
+import '../../models/board_member.dart';
+import 'tabs/contact_tab.dart';
+import 'tabs/program_tab.dart';
+import 'tabs/board_tab.dart';
+import 'features/about_ehs_screen.dart';
+import 'tabs/speakers_tab.dart';
 
 class ConferenceDetailsScreen extends StatefulWidget {
   final Conference conference;
@@ -24,6 +26,8 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
   
   // Board members - DIFFERENT for each conference
   late List<BoardMember> _boardMembers;
+  late List<BoardMember> _organizingCommittee;
+  late List<BoardMember> _scientificCommittee;
   
   // Quick actions - SAME NAMES for both conferences
   late List<QuickActionItem> _quickActions;
@@ -44,78 +48,200 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
     _initializeConferenceData();
   }
 
-  void _initializeConferenceData() {
+void _initializeConferenceData() {
     if (widget.conference.id == 'accc2026') {
-      // 🔴 ACCC 2026 - RED Cardiac Conference Data
+      // 🔵 1st CardioEHS Conference 2026 - BLUE (#004B99)
       _boardMembers = [
         BoardMember(
-          name: 'PROF.Wael Abou Shokka',
-          title: 'Head of Organizing Committe',
-          image: 'assets/board/member1.jpg',
-          specialty: 'Interventional Cardiology',
-        ),
-        BoardMember(
-          name: 'PROF.Ehab al saidy',
-          title: 'Scientific Committee Head',
-          image: 'assets/board/member2.jpg',
-          specialty: 'Cardiac Surgery',
-        ),
-        BoardMember(
-          name: 'PROF.Mohamed Nassef',
-          title: 'Program Director',
-          image: 'assets/board/member3.jpg',
-          specialty: 'Electrophysiology',
-        ),
-        BoardMember(
-          name: 'Mohamed Ashraf',
-          title: 'International Relations',
-          image: 'assets/board/member4.jpg',
-          specialty: 'Preventive Cardiology',
+          name: 'PROF. Arif Al Nooryani',
+          title: 'Conference President',
+          subtitle: 'President of 1st CardioEHS Conference',
+          image: 'assets/images/president_arif.jpg',
+          specialty: 'Cardiology',
+          category: 'president',
         ),
       ];
 
-      // ACCC Quick Actions - SAME NAMES
+      // Organizing Committee for CardioEHS
+      _organizingCommittee = [
+        BoardMember(
+          name: 'Dr. Wael Aboushokka',
+          title: 'Head of Organizing Committee',
+          image: 'assets/board/cardioehs_wael.jpg',
+          specialty: 'Interventional Cardiology',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Nassef',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_nassef.jpg',
+          specialty: 'Electrophysiology',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Ehab Al Saidy',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_ehab.jpg',
+          specialty: 'Cardiac Surgery',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Ashraf',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_ashraf.jpg',
+          
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Tarek Salem',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Salem.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Kareem Al Kwaity',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Kwaity.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Nour Abdeen',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Abdeen.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Medhat',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Medhat.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Shady Hamouda',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Hamouda.jpg',
+          category: 'organizing',
+        ),
+      ];
+
+      // Scientific Committee for CardioEHS
+      _scientificCommittee = [
+        BoardMember(
+          name: 'Dr. Ahmed Khashaba',
+          title: 'Head of Scientific Committee',
+          image: 'assets/board/cardioehs_Khashaba.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Nader Sorour',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Sorour.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Bassam Albaba',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Albaba.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Magdy Abbas',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Abbas.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. George Sianos',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Sianos.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Thaier Fadhel Khuzeim',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_ Khuzeim.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Jassim Al Hashimi',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Hashimi.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Fahed Buslib',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Buslib.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Abd almajeed Alzabaid',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Alzabaid.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Abdelaziz',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Abdelaziz.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Javed Khan',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Khan.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Shady Hamouda',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Hamouda.jpg',
+          category: 'scientific',
+        ),
+      ];
+
+      // CardioEHS Quick Actions
       _quickActions = [
         QuickActionItem(
           icon: Icons.badge_outlined,
           title: 'My Badge',
-          color: const Color(0xFFEA160A),
+          color: const Color(0xFF004B99),
           route: '/badge',
         ),
         QuickActionItem(
           icon: Icons.favorite_outline,
           title: 'Submissions',
-          color: const Color(0xFFE74C3C),
+          color: const Color(0xFFA0C4E0),
           route: '/workshops',
         ),
         QuickActionItem(
           icon: Icons.medical_services_outlined,
           title: 'Partners',
-          color: const Color(0xFFC0392B),
+          color: const Color(0xFF85AF99),
           route: '/partners',
         ),
         QuickActionItem(
           icon: Icons.bookmark_outline,
           title: 'Bookmarks',
-          color: const Color(0xFFF39C12),
+          color: const Color(0xFFC49A6C),
           route: '/bookmarks',
         ),
         QuickActionItem(
           icon: Icons.how_to_vote_outlined,
           title: 'Ask & Vote',
-          color: const Color(0xFF9B59B6),
+          color: const Color(0xFF66C5B5),
           route: '/ask-vote',
         ),
         QuickActionItem(
           icon: Icons.smart_toy_outlined,
           title: 'AI Bot',
-          color: const Color(0xFFEA160A),
+          color: const Color(0xFF004B99),
           route: '/ai-bot',
         ),
         QuickActionItem(
           icon: Icons.schedule_outlined,
           title: 'What Now',
-          color: const Color(0xFFE67E22),
+          color: const Color(0xFFA0C4E0),
           route: '/what-now',
         ),
         QuickActionItem(
@@ -127,89 +253,225 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
         QuickActionItem(
           icon: Icons.workspace_premium_outlined,
           title: 'Certificate',
-          color: const Color(0xFFD4AF37),
+          color: const Color(0xFFC49A6C),
           route: '/certificate',
         ),
       ];
     } else if (widget.conference.id == 'iccod2026') {
-      // 🔵 ICCOD 2026 - BLUE Critical Care Conference Data
+      // 🔵 3rd EHS International Critical Care & Organ Donation Conference 2026
       _boardMembers = [
-
-         BoardMember(
-          name: 'Suad Hussain Sajwani ',
-          title: 'CONFERENCE VICE PRESIDENT',
-          image: 'assets/board/member4.jpg',
-          specialty: 'Intensive Care',
-        ),
-        
         BoardMember(
-          name: 'PROF.Mohamed Nassef ',
-          title: 'HEAD OF ORGANIZING COMMITTEE',
-          image: 'assets/board/member1.jpg',
-          specialty: 'Critical Care Medicine',
+          name: 'Dr. Sumaya Abdullatif',
+          title: 'Conference President',
+          subtitle: 'Assistant Director of Medical Affairs',
+          specialty: 'Consultant Pediatrics / Cardiology',
+          organization: 'Al Qassimi Hospital',
+          location: 'Sharjah, UAE',
+          image: 'assets/images/president_sumaya.jpg',
+          category: 'president',
         ),
         BoardMember(
-          name: 'PROF.Islam Elfeky',
-          title: 'Transplant Committee',
-          image: 'assets/board/member2.jpg',
-          specialty: 'Organ Transplantation',
+          name: 'Dr. Suad Sajwani',
+          title: 'Co-chair of the Conference',
+          subtitle: 'Chair person of the scientific program',
+          specialty: 'Consultant transplant nephrologist',
+          organization: 'Head of kidney Transplant Program at EHS\nHead of Peritoneal Dialysis Program at EHS',
+          image: 'assets/board/iccod_suad.jpg',
+          category: 'cochair',
         ),
         BoardMember(
-          name: 'PROF.Mahmoud Mousa',
-          title: 'ICU Program Lead',
-          image: 'assets/board/member3.jpg',
-          specialty: 'Emergency Medicine',
+          name: 'Dr. Mohamed Nassef',
+          title: 'Head of Organizing Committee',
+          image: 'assets/board/iccod_nassef.jpg',
+          category: 'organizing',
         ),
         BoardMember(
-          name: 'PROF.Ahmed Abdallah',
-          title: 'Research Director',
-          image: 'assets/board/member4.jpg',
-          specialty: 'Intensive Care',
+          name: 'Dr. Galal Hassan Shalaby AbdelNaby',
+          title: 'Head of Scientific Committee',
+          image: 'assets/board/iccod_galal.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Eng. Sameeha Alzarouni',
+          title: 'Director of Exhibition',
+          subtitle: 'Head of Biomedical Engineering',
+          organization: 'Emirates Health Services (EHS)',
+          location: 'Sharjah, UAE',
+          image: 'assets/board/iccod_sameeha.jpg',
+          category: 'exhibition',
         ),
       ];
 
-      // ICCOD Quick Actions - SAME NAMES
+      // Organizing Committee Members
+      _organizingCommittee = [
+        BoardMember(
+          name: 'Dr. Mohamed Nassef',
+          title: 'Head of Organizing Committee',
+          image: 'assets/board/iccod_nassef.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Wael Abou Shokka',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_wael.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Ahmed Abdallah',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Abdallah.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Amr Kamal Abutaqia',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Abutaqia.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Mr. Boubaker Ben Ltaief',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Ben Ltaief.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Islam Lotfy Muhammad Elfeky',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Elfeky.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Mahmoud Abd El Gayed Mahmoud Mousa',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Mahmoud Mousa.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Hassan Badawy',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Badawy.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Abdelbadie Serour',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Abdelbadie Serour.jpg',
+          category: 'organizing',
+        ),
+        BoardMember(
+          name: 'Dr. Reda Mohamed Sherif',
+          title: 'Organizing Committee Member',
+          image: 'assets/board/cardioehs_Sherif.jpg',
+          category: 'organizing',
+        ),
+      ];
+
+      // Scientific Committee Members
+      _scientificCommittee = [
+        BoardMember(
+          name: 'Dr. Galal Hassan Shalaby AbdelNaby',
+          title: 'Head of Scientific Committee',
+          image: 'assets/board/cardioehs_Shalaby AbdelNaby.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Suad Hussain Sajwani',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/iccod_suad.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Nashat AbdelHalim Mahmoud',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_AbdelHalim Mahmoud.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Prof. Abdel Basset Elessawy',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Elessawy.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Amna Khalifa Al-Hadari',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Al-Hadari.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Ghamdan A. Al Sadeh',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Sadeh.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Prof. Khan Babar Ali',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Ali.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Mohamed Ali Mohamed Badawy',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Mohamed Badawy.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Nehad Nabeel Mohamed Qasim Alshirawi',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Qasim Alshirawi.jpg',
+          category: 'scientific',
+        ),
+        BoardMember(
+          name: 'Dr. Saeed Al Ghamdi',
+          title: 'Scientific Committee Member',
+          image: 'assets/board/cardioehs_Ghamdi.jpg',
+          category: 'scientific',
+        ),
+      ];
+
+      // ICCOD Quick Actions
       _quickActions = [
         QuickActionItem(
           icon: Icons.badge_outlined,
           title: 'My Badge',
-          color: const Color(0xFF00759E),
+          color: const Color(0xFF004B99),
           route: '/badge',
         ),
         QuickActionItem(
           icon: Icons.emergency_outlined,
           title: 'Submissions',
-          color: const Color(0xFF3498DB),
+          color: const Color(0xFFA0C4E0),
           route: '/workshops',
         ),
         QuickActionItem(
           icon: Icons.healing_outlined,
           title: 'Partners',
-          color: const Color(0xFF27AE60),
+          color: const Color(0xFF85AF99),
           route: '/partners',
         ),
         QuickActionItem(
           icon: Icons.bookmark_outline,
           title: 'Bookmarks',
-          color: const Color(0xFFF39C12),
+          color: const Color(0xFFC49A6C),
           route: '/bookmarks',
         ),
         QuickActionItem(
           icon: Icons.how_to_vote_outlined,
           title: 'Ask & Vote',
-          color: const Color(0xFF9B59B6),
+          color: const Color(0xFF66C5B5),
           route: '/ask-vote',
         ),
         QuickActionItem(
           icon: Icons.smart_toy_outlined,
           title: 'AI Bot',
-          color: const Color(0xFF00759E),
+          color: const Color(0xFF004B99),
           route: '/ai-bot',
         ),
         QuickActionItem(
           icon: Icons.schedule_outlined,
           title: 'What Now',
-          color: const Color(0xFF16A085),
+          color: const Color(0xFFA0C4E0),
           route: '/what-now',
         ),
         QuickActionItem(
@@ -221,7 +483,7 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
         QuickActionItem(
           icon: Icons.workspace_premium_outlined,
           title: 'Certificate',
-          color: const Color(0xFFD4AF37),
+          color: const Color(0xFFC49A6C),
           route: '/certificate',
         ),
       ];
@@ -251,9 +513,20 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
         index: _selectedTab,
         children: [
           _buildHomeTab(),
-          _buildBoardTab(),
+          BoardTab(
+            boardMembers: _boardMembers,
+            organizingCommittee: _organizingCommittee,
+            scientificCommittee: _scientificCommittee,
+            conferenceColor: widget.conference.color,
+            conferenceId: widget.conference.id,
+          ),
           _buildSpeakersTab(),
-          const ProgramTab(),
+          ProgramTab(
+  conferenceType: widget.conference.id, // accc2026 أو iccod2026
+  cardioProgramUrl: 'https://drive.google.com/file/d/1P4KHVfi9f1lAohKsC3gU0dTL5lFhshPw/view?usp=sharing',
+  criticalProgramUrl: 'https://drive.google.com/file/d/1DC_FuJ-TP9_aSgCQPsEMHlIsC3oDc6JG/view?usp=sharing',
+),
+
           const ContactTab(),
         ],
       ),
@@ -291,7 +564,6 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
   }
 
   Widget _buildModernAppBar() {
-    // Get the banner image path based on conference
     final String bannerImage = widget.conference.id == 'accc2026' 
         ? 'assets/accc_banner.jpg'
         : 'assets/iccod_banner.jpg';
@@ -306,12 +578,10 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Image Banner - NO TEXT OVERLAY
             Image.asset(
               bannerImage,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
-                // Fallback to gradient if image not found
                 return Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -327,7 +597,6 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
                 );
               },
             ),
-            // Light gradient overlay for better aesthetics
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -558,27 +827,23 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
                           ),
                         ),
                         const SizedBox(width: 20),
-                        Expanded(
+                        const Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.conference.id == 'accc2026' 
-                                    ? 'Ehs Training Village'
-                                    : 'Ehs Training Village',
-                                style: const TextStyle(
+                                'EHS Training Village',
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
                                   letterSpacing: -0.5,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Text(
-                                widget.conference.id == 'accc2026'
-                                    ? 'Ehs Training Village'
-                                    : 'Ehs Training Village',
-                                style: const TextStyle(
+                                'Interactive medical workshops',
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w500,
@@ -760,172 +1025,24 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
   }
 
   Widget _buildConferencePresidentSection() {
-  final presidentName = widget.conference.id == 'accc2026'
-      ? 'PROF. Arif Al Nooryani'
-      : 'PROF. Sumaya AlZarooni';
+    final presidentName = widget.conference.id == 'accc2026'
+        ? 'PROF. Arif Al Nooryani'
+        : 'Dr. Sumaya Abdullatif';
 
-  final presidentTitle = widget.conference.id == 'accc2026'
-      ? 'President OF 1st EHS Cardiovascular International Congress'
-      : 'President OF 3rd EHS International Critical Care Conference';
+    final presidentTitle = widget.conference.id == 'accc2026'
+        ? 'President OF 1st CardioEHS Conference'
+        : 'President OF 3rd EHS International Critical Care Conference';
 
-  // ✅ أضف صور الرؤساء
-  final presidentImage = widget.conference.id == 'accc2026'
-      ? 'assets/images/president_arif.jpg'
-      : 'assets/images/president_sumaya.jpg';
+    final presidentImage = widget.conference.id == 'accc2026'
+        ? 'assets/images/president_arif.jpg'
+        : 'assets/images/president_sumaya.jpg';
 
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 5,
-              height: 28,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    widget.conference.color,
-                    widget.conference.color.withOpacity(0.6),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Conference President',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF2C3E50),
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        TweenAnimationBuilder(
-          tween: Tween<double>(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 700),
-          curve: Curves.easeOutBack,
-          builder: (context, double value, child) {
-            final scale = (0.8 + (value * 0.2)).clamp(0.0, 1.0);
-            return Transform.scale(
-              scale: scale,
-              child: Opacity(
-                opacity: value.clamp(0.0, 1.0),
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: widget.conference.color.withOpacity(0.15),
-                        blurRadius: 30,
-                        offset: const Offset(0, 12),
-                        spreadRadius: -5,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // ✅ صورة الرئيس داخل إطار دائري خفيف
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: widget.conference.color.withOpacity(0.2),
-                            width: 2,
-                          ),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Image.asset(
-                          presidentImage,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    widget.conference.color,
-                                    widget.conference.color.withOpacity(0.8),
-                                  ],
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  presidentName
-                                      .split(' ')
-                                      .map((e) => e[0])
-                                      .take(2)
-                                      .join(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              presidentName,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF2C3E50),
-                                height: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              presidentTitle,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF7F8C8D),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    ),
-  );
-}
-
-
-  Widget _buildBoardMembersCarousel() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Container(
                 width: 5,
@@ -944,12 +1061,172 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
               ),
               const SizedBox(width: 12),
               const Text(
-                'Board Members',
+                'Conference President',
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF2C3E50),
                   letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          TweenAnimationBuilder(
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeOutBack,
+            builder: (context, double value, child) {
+              final scale = (0.8 + (value * 0.2)).clamp(0.0, 1.0);
+              return Transform.scale(
+                scale: scale,
+                child: Opacity(
+                  opacity: value.clamp(0.0, 1.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.conference.color.withOpacity(0.15),
+                          blurRadius: 30,
+                          offset: const Offset(0, 12),
+                          spreadRadius: -5,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: widget.conference.color.withOpacity(0.2),
+                              width: 2,
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Image.asset(
+                            presidentImage,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      widget.conference.color,
+                                      widget.conference.color.withOpacity(0.8),
+                                    ],
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    presidentName
+                                        .split(' ')
+                                        .map((e) => e[0])
+                                        .take(2)
+                                        .join(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                presidentName,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF2C3E50),
+                                  height: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                presidentTitle,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF7F8C8D),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBoardMembersCarousel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 5,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          widget.conference.color,
+                          widget.conference.color.withOpacity(0.6),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Board Members',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF2C3E50),
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              TextButton(
+                onPressed: () => setState(() => _selectedTab = 1),
+                child: const Text(
+                  'View All',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -962,7 +1239,7 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: _boardMembers.length,
+            itemCount: _boardMembers.take(5).length,
             itemBuilder: (context, index) {
               return _buildModernBoardCard(_boardMembers[index], index);
             },
@@ -1104,14 +1381,13 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
   }
 
   Widget _buildModernInfoCards() {
-    // Different info cards for each conference
     final cards = widget.conference.id == 'accc2026' 
         ? [
             {
               'title': 'Directions',
               'icon': Icons.map_outlined,
               'color': widget.conference.color,
-              'description': 'Al Qassimi Hospital, Sharjah',
+              'description': 'Intercontinental Dubai Festival City',
             },
             {
               'title': 'Cardiac Spotlights',
@@ -1131,7 +1407,7 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
               'title': 'Directions',
               'icon': Icons.map_outlined,
               'color': widget.conference.color,
-              'description': 'Dubai World Trade Centre',
+              'description': 'Intercontinental Dubai Festival City',
             },
             {
               'title': 'ICU Innovations',
@@ -1307,9 +1583,18 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
       Navigator.pushNamed(context, '/ask-vote');
     } else if (action.route == '/ai-bot') {
       Navigator.pushNamed(context, '/ai-bot');
-      
     } else if (action.route == '/workshops') {
-    Navigator.pushNamed(context, '/workshops');}else {
+      Navigator.pushNamed(
+        context, 
+        '/workshops',
+        arguments: {
+          'conferenceId': widget.conference.id, // 'accc2026' or 'iccod2026'
+        },
+      );
+      } else if (action.route == '/what-now') {
+  Navigator.pushNamed(context, '/what-now');
+
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -1360,67 +1645,13 @@ class _ConferenceDetailsScreenState extends State<ConferenceDetailsScreen> with 
     }
   }
 
-  Widget _buildBoardTab() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFF5F7FA), Colors.white],
-        ),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    widget.conference.color.withOpacity(0.1),
-                    widget.conference.color.withOpacity(0.05),
-                  ],
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.groups_rounded,
-                size: 80,
-                color: widget.conference.color,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Board Members',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF2C3E50),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Complete list coming soon',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
+  Widget _buildSpeakersTab() {
+    return SpeakersTab(
+      conferenceColor: widget.conference.color,
+      conferenceId: widget.conference.id,
+      speakers: const [], // ✅ ده المهم عشان الbuild ينجح
     );
   }
-
- Widget _buildSpeakersTab() {
-  return SpeakersTab(
-    conferenceColor: widget.conference.color,
-    conferenceId: widget.conference.id,
-  );
-}
-  
 
   Widget _buildModernNavBar() {
     return Container(
@@ -1724,19 +1955,5 @@ class QuickActionItem {
     required this.title,
     required this.color,
     required this.route,
-  });
-}
-
-class BoardMember {
-  final String name;
-  final String title;
-  final String image;
-  final String specialty;
-
-  BoardMember({
-    required this.name,
-    required this.title,
-    required this.image,
-    required this.specialty,
   });
 }

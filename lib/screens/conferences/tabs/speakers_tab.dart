@@ -4,9 +4,13 @@ import 'package:flutter/services.dart';
 class SpeakersTab extends StatefulWidget {
   final Color conferenceColor;
   final String? conferenceId;
-  
+
+  /// ✅ بدل الـ sample data: ابعت الليست الحقيقية من برّه
+  final List<Speaker> speakers;
+
   const SpeakersTab({
     Key? key,
+    required this.speakers,
     this.conferenceColor = const Color(0xFF2196F3),
     this.conferenceId,
   }) : super(key: key);
@@ -41,13 +45,20 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final filteredSpeakers = _getFilteredSpeakers();
+    final filteredSpeakers = _getFilteredSpeakers(widget.speakers);
+
+    // ✅ speakers المشاركين (ممكن نخليهم Keynote فقط أو كلهم)
+    final participatingSpeakers = widget.speakers; // أو: widget.speakers.where((s) => s.sessionType == 'Keynote').toList();
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         slivers: [
           _buildSearchHeader(),
+
+          /// ✅ NEW: يظهر أول حاجة بعد الـ AppBar
+          _buildParticipatingSpeakersStrip(participatingSpeakers),
+
           _buildFilterChips(),
           _buildSpeakersList(filteredSpeakers),
         ],
@@ -115,6 +126,145 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
     );
   }
 
+  /// ✅ NEW: Participating Speakers strip at the top
+  Widget _buildParticipatingSpeakersStrip(List<Speaker> speakers) {
+    if (speakers.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.groups_rounded, color: widget.conferenceColor),
+                const SizedBox(width: 8),
+                Text(
+                  'Participating Speakers',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[850],
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: widget.conferenceColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '${speakers.length}',
+                    style: TextStyle(
+                      color: widget.conferenceColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            SizedBox(
+              height: 84,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: speakers.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final sp = speakers[index];
+                  return InkWell(
+                    onTap: () => _showSpeakerDetails(sp),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: 220,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  widget.conferenceColor.withOpacity(0.8),
+                                  widget.conferenceColor,
+                                ],
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                _initials(sp.name),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  sp.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  sp.sessionType,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: widget.conferenceColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, color: Colors.grey[400]),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterChips() {
     return SliverToBoxAdapter(
       child: Container(
@@ -129,9 +279,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                 child: FilterChip(
                   selected: isSelected,
                   label: Text(filter),
-                  onSelected: (selected) {
-                    setState(() => _selectedFilter = filter);
-                  },
+                  onSelected: (_) => setState(() => _selectedFilter = filter),
                   backgroundColor: Colors.white,
                   selectedColor: widget.conferenceColor,
                   labelStyle: TextStyle(
@@ -204,10 +352,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
         ),
       ),
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.2),
-          end: Offset.zero,
-        ).animate(
+        position: Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _animationController,
             curve: Interval(index * 0.1, 1, curve: Curves.easeOut),
@@ -261,7 +406,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                         ),
                         child: Center(
                           child: Text(
-                            speaker.name.split(' ').map((e) => e[0]).take(2).join(),
+                            _initials(speaker.name),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -287,10 +432,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                           const SizedBox(height: 4),
                           Text(
                             speaker.title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                           ),
                           const SizedBox(height: 12),
                           _buildSessionInfo(speaker),
@@ -358,7 +500,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                       ),
                       child: Center(
                         child: Text(
-                          speaker.name.split(' ').map((e) => e[0]).take(2).join(),
+                          _initials(speaker.name),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -371,10 +513,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                   const SizedBox(height: 12),
                   Text(
                     speaker.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -382,10 +521,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                   const SizedBox(height: 4),
                   Text(
                     speaker.title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -422,10 +558,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[700],
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -439,8 +572,8 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
       mainAxisSize: MainAxisSize.min,
       children: [
         if (speaker.email != null) _buildSocialButton(Icons.email, speaker.email!, Colors.red),
-        if (speaker.linkedin != null) _buildSocialButton(Icons.business, speaker.linkedin!, Colors.blue[700]!),
-        if (speaker.twitter != null) _buildSocialButton(Icons.tag, speaker.twitter!, Colors.blue[400]!),
+        if (speaker.linkedin != null) _buildSocialButton(Icons.business, speaker.linkedin!, Colors.blue),
+        if (speaker.twitter != null) _buildSocialButton(Icons.tag, speaker.twitter!, Colors.lightBlue),
       ],
     );
   }
@@ -530,7 +663,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                     ),
                     child: Center(
                       child: Text(
-                        speaker.name.split(' ').map((e) => e[0]).take(2).join(),
+                        _initials(speaker.name),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 40,
@@ -544,19 +677,13 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
               const SizedBox(height: 24),
               Text(
                 speaker.name,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 speaker.title,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -581,12 +708,9 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  if (speaker.email != null)
-                    _buildContactChip(Icons.email, speaker.email!, Colors.red),
-                  if (speaker.linkedin != null)
-                    _buildContactChip(Icons.business, speaker.linkedin!, Colors.blue[700]!),
-                  if (speaker.twitter != null)
-                    _buildContactChip(Icons.tag, speaker.twitter!, Colors.blue[400]!),
+                  if (speaker.email != null) _buildContactChip(Icons.email, speaker.email!, Colors.red),
+                  if (speaker.linkedin != null) _buildContactChip(Icons.business, speaker.linkedin!, Colors.blue),
+                  if (speaker.twitter != null) _buildContactChip(Icons.tag, speaker.twitter!, Colors.lightBlue),
                 ],
               ),
               const SizedBox(height: 24),
@@ -618,11 +742,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
         const SizedBox(height: 12),
         Text(
           content,
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.grey[700],
-            height: 1.5,
-          ),
+          style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.5),
         ),
       ],
     );
@@ -645,10 +765,7 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
             const SizedBox(width: 8),
             Text(
               contact,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: color, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -656,15 +773,16 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
     );
   }
 
-  List<Speaker> _getFilteredSpeakers() {
-    List<Speaker> speakers = _getSampleSpeakers();
+  List<Speaker> _getFilteredSpeakers(List<Speaker> allSpeakers) {
+    var speakers = List<Speaker>.from(allSpeakers);
 
     if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
       speakers = speakers
           .where((s) =>
-              s.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              s.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              s.topic.toLowerCase().contains(_searchQuery.toLowerCase()))
+              s.name.toLowerCase().contains(q) ||
+              s.title.toLowerCase().contains(q) ||
+              s.topic.toLowerCase().contains(q))
           .toList();
     }
 
@@ -675,118 +793,12 @@ class _SpeakersTabState extends State<SpeakersTab> with SingleTickerProviderStat
     return speakers;
   }
 
-  List<Speaker> _getSampleSpeakers() {
-    // Check conference ID to return different speakers
-    if (widget.conferenceId == 'accc2026') {
-      return _getACCCSpeakers();
-    } else if (widget.conferenceId == 'iccod2026') {
-      return _getICCODSpeakers();
-    }
-    
-    // Default speakers
-    return _getDefaultSpeakers();
-  }
-
-  List<Speaker> _getACCCSpeakers() {
-    return [
-      Speaker(
-        id: '1',
-        name: 'Dr. Ahmed Hassan',
-        title: 'Chief Cardiologist at Dubai Heart Center',
-        topic: 'Advances in Interventional Cardiology',
-        sessionType: 'Keynote',
-        hall: 'Main Hall A',
-        time: 'Day 1, 09:00 AM - 10:30 AM',
-        bio: 'Dr. Ahmed Hassan is a leading expert in interventional cardiology with over 20 years of experience. He has performed thousands of cardiac procedures and pioneered new techniques.',
-        email: 'ahmed.h@dubaiheartcenter.ae',
-        linkedin: 'linkedin.com/in/ahmedhassan',
-        twitter: '@drahmedcardio',
-      ),
-      Speaker(
-        id: '2',
-        name: 'Prof. Fatima Al Mansoori',
-        title: 'Head of Cardiac Surgery, Al Qassimi Hospital',
-        topic: 'Minimally Invasive Cardiac Surgery',
-        sessionType: 'Workshop',
-        hall: 'Hall B',
-        time: 'Day 1, 11:00 AM - 12:30 PM',
-        bio: 'Professor Fatima is an internationally recognized cardiac surgeon specializing in minimally invasive techniques. She has trained surgeons across the Middle East.',
-        email: 'f.almansoori@alqassimi.ae',
-        linkedin: 'linkedin.com/in/fatimamansoori',
-      ),
-      Speaker(
-        id: '3',
-        name: 'Dr. Mohammed Ibrahim',
-        title: 'Electrophysiology Specialist',
-        topic: 'Arrhythmia Management in 2026',
-        sessionType: 'Panel',
-        hall: 'Conference Room 1',
-        time: 'Day 2, 02:00 PM - 03:00 PM',
-        bio: 'Dr. Mohammed is an expert in cardiac electrophysiology with a focus on complex arrhythmia ablation procedures.',
-        email: 'm.ibrahim@ehscardio.ae',
-        twitter: '@drmohcardio',
-      ),
-    ];
-  }
-
-  List<Speaker> _getICCODSpeakers() {
-    return [
-      Speaker(
-        id: '1',
-        name: 'Dr. Sumaya AlZarooni',
-        title: 'Critical Care Director, Emirates Health Services',
-        topic: 'ICU Management Protocols in Critical Care',
-        sessionType: 'Keynote',
-        hall: 'Main Hall A',
-        time: 'Day 1, 09:00 AM - 10:30 AM',
-        bio: 'Dr. Sumaya is the President of the conference and a leading expert in critical care medicine with extensive experience in ICU management.',
-        email: 'sumaya.alzarooni@ehs.gov.ae',
-        linkedin: 'linkedin.com/in/sumayaalzarooni',
-        twitter: '@drsumayaicu',
-      ),
-      Speaker(
-        id: '2',
-        name: 'Prof. Islam Elfeky',
-        title: 'Transplant Committee Head',
-        topic: 'Organ Transplantation in Critical Care',
-        sessionType: 'Workshop',
-        hall: 'Hall B',
-        time: 'Day 1, 11:00 AM - 12:30 PM',
-        bio: 'Professor Islam is a renowned expert in organ transplantation and critical care management for transplant patients.',
-        email: 'i.elfeky@ehs.gov.ae',
-        linkedin: 'linkedin.com/in/islamelfeky',
-      ),
-      Speaker(
-        id: '3',
-        name: 'Dr. Mahmoud Mousa',
-        title: 'ICU Program Lead',
-        topic: 'Emergency Medicine in Critical Care Settings',
-        sessionType: 'Panel',
-        hall: 'Conference Room 1',
-        time: 'Day 2, 02:00 PM - 03:00 PM',
-        bio: 'Dr. Mahmoud specializes in emergency medicine and leads the ICU program with innovative approaches to critical care.',
-        email: 'm.mousa@ehs.gov.ae',
-        twitter: '@drmahmoudicu',
-      ),
-    ];
-  }
-
-  List<Speaker> _getDefaultSpeakers() {
-    return [
-      Speaker(
-        id: '1',
-        name: 'Dr. Sarah Johnson',
-        title: 'Chief Technology Officer at TechCorp',
-        topic: 'AI in Healthcare: Transforming Patient Care',
-        sessionType: 'Keynote',
-        hall: 'Main Hall A',
-        time: 'Today, 09:00 AM - 10:30 AM',
-        bio: 'Dr. Sarah Johnson is a renowned expert in artificial intelligence with over 15 years of experience in healthcare technology.',
-        email: 'sarah.j@techcorp.com',
-        linkedin: 'linkedin.com/in/sarahjohnson',
-        twitter: '@sarahjtech',
-      ),
-    ];
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '';
+    final first = parts.first.isNotEmpty ? parts.first[0] : '';
+    final second = parts.length > 1 && parts[1].isNotEmpty ? parts[1][0] : '';
+    return (first + second).toUpperCase();
   }
 }
 

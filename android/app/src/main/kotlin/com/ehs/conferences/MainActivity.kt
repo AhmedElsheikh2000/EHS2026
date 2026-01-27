@@ -1,4 +1,4 @@
-package com.example.ehs_conferences
+package com.ehs.conferences
 
 import io.flutter.embedding.android.FlutterActivity
 

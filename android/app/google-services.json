@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "78571326032",
+    "project_id": "ehs-conferences",
+    "storage_bucket": "ehs-conferences.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:78571326032:android:eb250e001121b3b7b25f55",
+        "android_client_info": {
+          "package_name": "com.ehs.conferences"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnC2oNrzwFgc5KOk05FPaHp4MV2mIuHKo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

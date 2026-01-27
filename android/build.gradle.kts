@@ -5,13 +5,16 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
-rootProject.layout.buildDirectory.value(newBuildDir)
+// ✅ مهم جدًا: خلّي كل مخرجات build تروح للـ root build folder (../build)
+// ده اللي Flutter بيعتمد عليه عشان يلاقي الـ APK
+val newBuildDir = rootProject.layout.projectDirectory.dir("../build")
+rootProject.layout.buildDirectory.set(newBuildDir)
 
 subprojects {
-    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
-    project.layout.buildDirectory.value(newSubprojectBuildDir)
+    val subprojectBuildDir = newBuildDir.dir(project.name)
+    project.layout.buildDirectory.set(subprojectBuildDir)
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

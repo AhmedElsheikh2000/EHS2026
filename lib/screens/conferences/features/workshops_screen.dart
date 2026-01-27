@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WorkshopsScreen extends StatefulWidget {
-  const WorkshopsScreen({Key? key}) : super(key: key);
+  final String conferenceId; // 'accc2026' or 'iccod2026'
+  
+  const WorkshopsScreen({
+    Key? key,
+    required this.conferenceId,
+  }) : super(key: key);
 
   @override
   State<WorkshopsScreen> createState() => _WorkshopsScreenState();
@@ -14,7 +20,7 @@ class _WorkshopsScreenState extends State<WorkshopsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this); // Changed to 2 tabs
   }
 
   @override
@@ -31,7 +37,7 @@ class _WorkshopsScreenState extends State<WorkshopsScreen>
         elevation: 0,
         backgroundColor: Colors.white,
         title: const Text(
-          'EHS Conference Features',
+          'Conference Submissions',
           style: TextStyle(
             color: Color(0xFF1A1A2E),
             fontWeight: FontWeight.bold,
@@ -64,8 +70,7 @@ class _WorkshopsScreenState extends State<WorkshopsScreen>
               ),
               tabs: const [
                 Tab(text: 'Future Speakers'),
-                Tab(text: 'Championship'),
-                Tab(text: 'Best Abstract'),
+                Tab(text: 'Abstract Submission'),
               ],
             ),
           ),
@@ -73,17 +78,489 @@ class _WorkshopsScreenState extends State<WorkshopsScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          FutureSpeakersForm(),
-          ChampionshipForm(),
-          BestAbstractForm(),
+        children: [
+          const FutureSpeakersForm(),
+          AbstractSubmissionInfo(conferenceId: widget.conferenceId),
         ],
       ),
     );
   }
 }
 
-// Future Speakers Grant Form
+// Abstract Submission Info Screen
+class AbstractSubmissionInfo extends StatelessWidget {
+  final String conferenceId;
+  
+  const AbstractSubmissionInfo({
+    Key? key,
+    required this.conferenceId,
+  }) : super(key: key);
+
+  // Get conference-specific data
+  Map<String, dynamic> get _conferenceData {
+    if (conferenceId == 'accc2026') {
+      return {
+        'title': 'Call for Abstracts',
+        'subtitle': 'Share Your Research in Cardiovascular Medicine',
+        'submissionUrl': 'https://sys.foldergroup.com/abstracts/abstractsubmission?confid=18509',
+        'gradient': const LinearGradient(
+          colors: [Color(0xFF004B99), Color(0xFF0066CC)],
+        ),
+        'icon': Icons.favorite,
+        'categories': [
+          'Coronary interventions',
+          'Interventions for valvular disease',
+          'Interventions for heart failure',
+          'Peripheral interventions',
+          'Interventions for hypertension',
+          'Interventions for stroke',
+          'Others',
+        ],
+      };
+    } else {
+      return {
+        'title': 'Call for Abstracts',
+        'subtitle': 'Share Your Research in Critical Care and Organ Donation',
+        'submissionUrl': 'https://sys.foldergroup.com/abstracts/abstractsubmission?confid=18507',
+        'gradient': const LinearGradient(
+          colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
+        ),
+        'icon': Icons.medical_services,
+        'categories': [
+          'Critical Care Medicine',
+          'Organ Donation & Transplantation',
+          'Brain Death & Neurological Assessment',
+          'Intensive Care Management',
+          'Donor Management & Preservation',
+          'Transplant Surgery & Techniques',
+          'Ethics in Organ Donation',
+          'Pediatric Critical Care & Transplantation',
+          'Post-Transplant Care',
+          'Innovation in Critical Care Technology',
+          'Others',
+        ],
+      };
+    }
+  }
+
+  Future<void> _launchSubmissionUrl(BuildContext context) async {
+  final url = _conferenceData['submissionUrl'] as String;
+  final uri = Uri.parse(url);
+  
+  try {
+    // استخدم externalApplication عشان يفتح في البراوزر الخارجي
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    
+    if (!launched) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not open submission form'),
+            backgroundColor: Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Color(0xFFEF4444),
+        ),
+      );
+    }
+  }
+}
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _conferenceData;
+    final categories = data['categories'] as List<String>;
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          _buildHeader(
+            icon: data['icon'] as IconData,
+            title: data['title'] as String,
+            subtitle: data['subtitle'] as String,
+            gradient: data['gradient'] as Gradient,
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Conference Details
+          _buildInfoCard(
+            icon: Icons.calendar_today,
+            title: '27 – 29 March 2026',
+            subtitle: 'Dubai, UAE',
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Important Dates
+          const Text(
+            'Important Dates',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          Row(
+            children: [
+              Expanded(
+                child: _buildDateCard(
+                  label: 'OPEN',
+                  date: '01/12',
+                  year: '2025',
+                  color: const Color(0xFF10B981),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildDateCard(
+                  label: 'DEADLINE',
+                  date: '15/02',
+                  year: '2026',
+                  color: const Color(0xFFEF4444),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildDateCard(
+                  label: 'DECISION',
+                  date: '01/03',
+                  year: '2026',
+                  color: const Color(0xFF2563EB),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Key Rules
+          const Text(
+            'Key Submission Rules',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          _buildRuleItem('Maximum 250 words, Arial 10pt, English only'),
+          _buildRuleItem('One figure/table/graph permitted'),
+          _buildRuleItem('Include authors\' names, degrees, and affiliations'),
+          _buildRuleItem('Provide corresponding author\'s email'),
+          _buildRuleItem('Accepted as e-poster or oral presentation'),
+          _buildRuleItem('⚠️ Presenting authors must register before 1 March 2026', isWarning: true),
+          
+          const SizedBox(height: 24),
+          
+          // Abstract Categories
+          const Text(
+            'Abstract Categories',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          ...categories.asMap().entries.map((entry) {
+            return _buildCategoryItem(entry.key + 1, entry.value);
+          }).toList(),
+          
+          const SizedBox(height: 24),
+          
+          // Required Sections
+          const Text(
+            'Required Abstract Sections',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          _buildRequiredSection('Title'),
+          _buildRequiredSection('Introduction'),
+          _buildRequiredSection('Aim/Objective'),
+          _buildRequiredSection('Methods'),
+          _buildRequiredSection('Results'),
+          _buildRequiredSection('Conclusion'),
+          
+          const SizedBox(height: 32),
+          
+          // Submit Button
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () => _launchSubmissionUrl(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.open_in_new, size: 24),
+                  SizedBox(width: 12),
+                  Text(
+                    'Submit Your Abstract',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: const Color(0xFF2563EB), size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateCard({
+    required String label,
+    required String date,
+    required String year,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            date,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
+          ),
+          Text(
+            year,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: color.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRuleItem(String text, {bool isWarning = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isWarning 
+                  ? const Color(0xFFFEF3C7) 
+                  : const Color(0xFF2563EB).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isWarning ? Icons.warning_amber : Icons.check,
+              size: 14,
+              color: isWarning ? const Color(0xFFF59E0B) : const Color(0xFF2563EB),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: isWarning ? const Color(0xFFB45309) : const Color(0xFF475569),
+                fontWeight: isWarning ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryItem(int number, String category) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E8EB)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                number.toString(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2563EB),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              category,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequiredSection(String section) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.arrow_right,
+            color: Color(0xFF2563EB),
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            section,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF475569),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Future Speakers Grant Form (keeping the same)
 class FutureSpeakersForm extends StatefulWidget {
   const FutureSpeakersForm({Key? key}) : super(key: key);
 
@@ -114,7 +591,6 @@ class _FutureSpeakersFormState extends State<FutureSpeakersForm> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
       
-      // Simulate API call
       await Future.delayed(const Duration(seconds: 2));
       
       if (mounted) {
@@ -208,284 +684,38 @@ class _FutureSpeakersFormState extends State<FutureSpeakersForm> {
                   value?.isEmpty ?? true ? 'Motivation is required' : null,
             ),
             const SizedBox(height: 30),
-            _buildSubmitButton(onPressed: _submitForm),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// Championship Form
-class ChampionshipForm extends StatefulWidget {
-  const ChampionshipForm({Key? key}) : super(key: key);
-
-  @override
-  State<ChampionshipForm> createState() => _ChampionshipFormState();
-}
-
-class _ChampionshipFormState extends State<ChampionshipForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _teamNameController = TextEditingController();
-  final _leaderNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _membersController = TextEditingController();
-  final _projectController = TextEditingController();
-  bool _isSubmitting = false;
-
-  @override
-  void dispose() {
-    _teamNameController.dispose();
-    _leaderNameController.dispose();
-    _emailController.dispose();
-    _membersController.dispose();
-    _projectController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isSubmitting = true);
-      
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Registration completed successfully! 🏆'),
-            backgroundColor: const Color(0xFF10B981),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
-        _formKey.currentState!.reset();
-        _teamNameController.clear();
-        _leaderNameController.clear();
-        _emailController.clear();
-        _membersController.clear();
-        _projectController.clear();
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(
-              icon: Icons.emoji_events_rounded,
-              title: 'EHS Championship',
-              subtitle: 'Register your team for the competition',
-              gradient: const LinearGradient(
-                colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _isSubmitting ? null : _submitForm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  disabledBackgroundColor: const Color(0xFF94A3B8),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Submit Application',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
-            const SizedBox(height: 30),
-            _buildTextField(
-              controller: _teamNameController,
-              label: 'Team Name',
-              hint: 'Enter your team name',
-              icon: Icons.group_outlined,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Team name is required' : null,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _leaderNameController,
-              label: 'Team Leader Name',
-              hint: 'Enter team leader name',
-              icon: Icons.person_outline,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Leader name is required' : null,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _emailController,
-              label: 'Contact Email',
-              hint: 'team.email@example.com',
-              icon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value?.isEmpty ?? true) return 'Email is required';
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                    .hasMatch(value!)) {
-                  return 'Enter a valid email';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _membersController,
-              label: 'Team Members',
-              hint: 'List all team members (comma separated)',
-              icon: Icons.people_outline,
-              maxLines: 3,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Team members are required' : null,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _projectController,
-              label: 'Project Description',
-              hint: 'Describe your championship project',
-              icon: Icons.lightbulb_outline,
-              maxLines: 5,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Project description is required' : null,
-            ),
-            const SizedBox(height: 30),
-            _buildSubmitButton(onPressed: _submitForm),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// Best Abstract Form
-class BestAbstractForm extends StatefulWidget {
-  const BestAbstractForm({Key? key}) : super(key: key);
-
-  @override
-  State<BestAbstractForm> createState() => _BestAbstractFormState();
-}
-
-class _BestAbstractFormState extends State<BestAbstractForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _authorController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _titleController = TextEditingController();
-  final _abstractController = TextEditingController();
-  final _keywordsController = TextEditingController();
-  String _selectedCategory = 'Research';
-  bool _isSubmitting = false;
-
-  @override
-  void dispose() {
-    _authorController.dispose();
-    _emailController.dispose();
-    _titleController.dispose();
-    _abstractController.dispose();
-    _keywordsController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isSubmitting = true);
-      
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Abstract submitted successfully! 📄'),
-            backgroundColor: const Color(0xFF10B981),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
-        _formKey.currentState!.reset();
-        _authorController.clear();
-        _emailController.clear();
-        _titleController.clear();
-        _abstractController.clear();
-        _keywordsController.clear();
-        setState(() => _selectedCategory = 'Research');
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(
-              icon: Icons.article_rounded,
-              title: 'Best Abstract Award',
-              subtitle: 'Submit your research abstract for evaluation',
-              gradient: const LinearGradient(
-                colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
-              ),
-            ),
-            const SizedBox(height: 30),
-            _buildTextField(
-              controller: _authorController,
-              label: 'Author Name',
-              hint: 'Enter primary author name',
-              icon: Icons.person_outline,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Author name is required' : null,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _emailController,
-              label: 'Email Address',
-              hint: 'author.email@example.com',
-              icon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value?.isEmpty ?? true) return 'Email is required';
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                    .hasMatch(value!)) {
-                  return 'Enter a valid email';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            _buildDropdown(
-              value: _selectedCategory,
-              label: 'Category',
-              icon: Icons.category_outlined,
-              items: const ['Research', 'Case Study', 'Review', 'Innovation'],
-              onChanged: (value) {
-                setState(() => _selectedCategory = value!);
-              },
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _titleController,
-              label: 'Abstract Title',
-              hint: 'Enter your abstract title',
-              icon: Icons.title_outlined,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Title is required' : null,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _abstractController,
-              label: 'Abstract Content',
-              hint: 'Enter your complete abstract (max 300 words)',
-              icon: Icons.notes_outlined,
-              maxLines: 8,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Abstract content is required' : null,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _keywordsController,
-              label: 'Keywords',
-              hint: 'Enter keywords (comma separated)',
-              icon: Icons.tag_outlined,
-              validator: (value) =>
-                  value?.isEmpty ?? true ? 'Keywords are required' : null,
-            ),
-            const SizedBox(height: 30),
-            _buildSubmitButton(onPressed: _submitForm),
           ],
         ),
       ),
@@ -604,99 +834,5 @@ Widget _buildTextField({
         ),
       ),
     ],
-  );
-}
-
-Widget _buildDropdown({
-  required String value,
-  required String label,
-  required IconData icon,
-  required List<String> items,
-  required void Function(String?) onChanged,
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF1E293B),
-        ),
-      ),
-      const SizedBox(height: 8),
-      DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xFF64748B)),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
-          ),
-          contentPadding: const EdgeInsets.all(16),
-        ),
-        items: items
-            .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-            .toList(),
-        onChanged: onChanged,
-      ),
-    ],
-  );
-}
-
-Widget _buildSubmitButton({required VoidCallback onPressed}) {
-  return Builder(
-    builder: (context) {
-      final isSubmitting = context
-          .findAncestorStateOfType<_FutureSpeakersFormState>()
-          ?._isSubmitting ??
-          context.findAncestorStateOfType<_ChampionshipFormState>()?._isSubmitting ??
-          context.findAncestorStateOfType<_BestAbstractFormState>()?._isSubmitting ??
-          false;
-
-      return SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: isSubmitting ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            disabledBackgroundColor: const Color(0xFF94A3B8),
-          ),
-          child: isSubmitting
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Text(
-                  'Submit Application',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-        ),
-      );
-    },
   );
 }

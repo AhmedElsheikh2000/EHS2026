@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
@@ -14,9 +15,22 @@ import 'screens/conferences/features/ask_vote_screen.dart';
 import 'screens/conferences/features/bookmarks_screen.dart';
 import 'screens/conferences/ehs_training_village_screen.dart';
 import 'screens/conferences/features/workshops_screen.dart';
+import 'screens/conferences/features/what_now_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      // 🔥 هنا حط بيانات Firebase بتاعك من Firebase Console
+      apiKey: "AIzaSyBnC2oNrzwFgc5KOk05FPaHp4MV2mIuHKo",
+      appId: "1:78571326032:android:eb250e001121b3b7b25f55", 
+      messagingSenderId: "78571326032",
+      projectId: "ehs-conferences",
+      storageBucket: "ehs-conferences.firebasestorage.app",
+    ),
+  );
   
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -82,6 +96,9 @@ class EHSConferenceApp extends StatelessWidget {
             phoneNumber: args?['phoneNumber'] ?? "+971000000000",
           ),
         );
+        case '/what-now':
+  return _createRoute(const WhatNowScreen());
+
       
       case '/badge':
         final args = settings.arguments as Map<String, dynamic>?;
@@ -121,8 +138,15 @@ class EHSConferenceApp extends StatelessWidget {
 
       case '/training-village':
         return _createRoute(const EHSTrainingVillageScreen());
-        case '/workshops':
-  return _createRoute(const WorkshopsScreen());
+        
+      case '/workshops':
+        // ✅ التعديل هنا - استقبال conferenceId
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _createRoute(
+          WorkshopsScreen(
+            conferenceId: args?['conferenceId'] ?? 'accc2026', // Default to CardioEHS
+          ),
+        );
     
       default:
         return _createRoute(const SplashScreen());
