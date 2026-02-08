@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.ehs.conferences"
+    namespace = "com.foldergroup.ehs.eventhub"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -30,7 +30,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.ehs.conferences"
+        applicationId = "com.foldergroup.ehs.eventhub"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
 
